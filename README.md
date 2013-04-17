@@ -21,7 +21,7 @@ The plugin can be used for the following Bluetooth Smart actions:
 SAMPLE APPLICATION
 ======================
 
-A sample application using the plugin is included in the "Sample Application" folder. 
+A sample application using the plugin is included in the "Sample Application" folder. The application can be run on an iPhone 4s or iPhone 5, and a Bluetooth Smart peripheral is needed for testing. 
 
 
 PLUGIN SETUP FOR IOS
@@ -41,7 +41,7 @@ To retrieve data from the peripheral, some parts of the native code in the plugi
 
 
 
-FEEDBACK
+FEEDBACK AND IMPROVEMENTS
 ======================
 
 Please give feedback! The code will be improved if somebody have any suggestions or find bugs.
