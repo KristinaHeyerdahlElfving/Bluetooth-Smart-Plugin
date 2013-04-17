@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<!--
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+# 
+# http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+-->
+  <head>
+  <title></title>
+  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+	<meta charset="utf-8">
+
+
+	<!-- iPad/iPhone specific css below, add after your main css >
+	<link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />		
+	<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />		
+	-->
+	<!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
+	<script type="text/javascript" charset="utf-8" src="cordova-1.8.1.js"></script>
+        
+        <script type="text/javascript" charset="utf-8" src="pluginFile.js"></script>
+
+    <script type="text/javascript">
+
+        
+        /************* Set up ****************/
+        
+        
+        // global variable
+        var connectedToPeripheral;
+        
+        // prevent dragging
+        function preventBehavior(e)
+        {
+            e.preventDefault();
+        };
+        document.addEventListener("touchmove", preventBehavior, false);
+        
+                
+        function onBodyLoad()
+        {		
+            document.addEventListener("deviceready", onDeviceReady, false);
+        }
+	
+        function onDeviceReady()
+        {
+            //navigator.notification.alert("Cordova is working")
+        
+            bleSetup('success');
+        
+            connectedToPeripheral = 0;
+        
+            //draw();
+        }
+        
+        
+        
+        // fixes setup
+        function bleSetup(returnSuccess){
+            ble.setup(blePSearchResultHandler, blePSearchErrorHandler, returnSuccess);
+        }
+        
+        
+        
+        /************* Search ****************/
+        
+        // search for peripheral
+        function blePSearch( returnSuccess ) {
+            search.callBlePSearch( blePSearchResultHandler, blePSearchErrorHandler, returnSuccess );
+        }
+        function blePSearchResultHandler (result) {
+            setTimeout(function() {
+                       var answer = confirm ("Connect to "+result+"?");
+                       
+                       // calling blePConnect with the answer and result
+                       blePConnect(answer, result);
+                       
+            }, 0);
+        }
+        
+        function blePSearchErrorHandler (error) {
+            alert("ERROR: \r\n"+error );
+        }
+        
+        /************* Connect ****************/
+
+        
+        function blePConnect(answer, result){
+            if (answer){
+                connect.callBlePConnect(blePConnectResultHandler, blePConnectErrorHandler, "success");
+            }
+            else{
+                alert ("Not connecting to "+result+". Continuing to search for Bluetooth Smart devices.");
+                search.callBlePSearch( blePSearchResultHandler, blePSearchErrorHandler, returnSuccess );
+
+            }
+        }
+        function blePConnectResultHandler (result) {
+            setTimeout(function() {
+                       
+                connectedToPeripheral = 1;
+                       
+                alert("Connected to "+result);
+                       
+                       
+                // set notification on battery/temp
+                blePNotify();
+                                      
+                displayInfo(result, null, null);
+                
+                       
+            }, 0);
+            
+        }
+        function blePConnectErrorHandler (error) {
+            alert("ERROR: \r\n"+error );
+        }
+        
+        /************* Disconnect ****************/
+
+        function blePDisconnect(returnSuccess){
+            // hvis connected til noe - disconnect
+            if(connectedToPeripheral == 1){
+                disconnect.callBlePDisconnect(blePDisconnectResultHandler, blePDisconnectErrorHandler, "success");
+                                
+            }
+            // hvis ikke connected - gi beskjed
+            else if(connectedToPeripheral == 0){
+                alert("Can not disconnect, not connected to any Bluetooth Smart device");
+                removeInfo();
+
+            }
+            
+            
+        }
+        function blePDisconnectResultHandler (result) {
+            setTimeout(function() {
+                       connectedToPeripheral = 0;
+                       alert("Disconnected from  "+result);
+                       removeInfo();
+                       
+            }, 0);
+            
+        }
+        function blePDisconnectErrorHandler (error) {
+            alert("ERROR: \r\n"+error );
+        }
+
+        /************* Characteristic ****************/
+
+        function blePNotify(){
+            notify.callBlePNotify(blePNotifyResultHandler, blePNotifyErrorHandler, "success");
+            
+        }
+        function blePNotifyResultHandler (result) {
+            setTimeout(function() {
+                       
+                       }, 0);
+            
+        }
+        function blePNotifyErrorHandler (error) {
+            alert("ERROR: \r\n"+error );
+        }
+        
+        
+        /************* User interface data ****************/
+        
+        var temperatureArray = new Array();
+
+        
+        function displayInfo(name, battery, temperature){            
+            if(name != "(null)"){
+                var a = document.getElementById('name').innerHTML = name;
+
+            }
+            if(battery != "(null)"){
+                var a = document.getElementById('battery').innerHTML = battery+"%";
+                
+            }
+            if(temperature != "(null)"){
+                var a = document.getElementById('temperature').innerHTML = temperature;
+                
+                //temperatureArray.push('temperature');
+                temperatureArray[temperatureArray.length] = temperature;
+
+                //draw(temperatureArray);
+
+            }
+        }
+        function removeInfo(){
+            var name = document.getElementById('name').innerHTML = 'Not connected';
+            var batt = document.getElementById('battery').innerHTML = '-';
+            var temp = document.getElementById('temperature').innerHTML = '-';
+
+        }
+                
+        
+        function draw(temperatureArray){
+            // get the canvas element using the DOM
+            var canvas = document.getElementById('canvas');
+        
+            // lage ny array av de siste verdiene
+            var temp = new Array();
+
+            //temperatureArray = [32, 27, 39, 22, 22, 45, 45, 34, 22, 26, 30];
+            
+            // Make sure we don't execute when canvas isn't supported
+            if (canvas.getContext){
+                
+                // use getContext to use the canvas for drawing
+                var ctx = canvas.getContext('2d');
+                
+                
+                
+                ctx.beginPath();
+                ctx.moveTo(30, 0);
+                ctx.lineTo(30, 120);
+                ctx.lineTo(260, 120);
+                ctx.stroke();
+                
+                                
+                var x = 30;
+                var y = 0;
+
+                
+                ctx.beginPath();
+                ctx.moveTo(30, temperatureArray[0]);
+
+                
+                for(var i = 0; i < temperatureArray.length; i++) {
+                    //ctx.lineTo('start', 100);
+                    ctx.lineTo(x, temperatureArray[i]);
+                    x += 20;
+                }
+                
+                ctx.stroke();
+
+                
+                // Filled triangle
+                /*ctx.beginPath();
+                ctx.moveTo(25,25);
+                ctx.lineTo(105,25);
+                ctx.lineTo(25,105);
+                ctx.fill();
+                
+                // Stroked triangle
+                ctx.beginPath();
+                ctx.moveTo(125,125);
+                ctx.lineTo(125,45);
+                ctx.lineTo(45,125);
+                ctx.closePath();
+                ctx.stroke();*/
+            }
+        }
+     
+    
+    </script>
+        
+  </head>
+  <body onload="onBodyLoad()">
+      </p><p>
+
+      <div style="width:300px;height:200px;border:1px solid #000; text-align: center">
+          <h3>Connect Bluetooth Smart device</h3>
+
+          
+          <p>
+          
+            <button type=button style="width:270px;height:40px" onclick="blePSearch('success');">Search for device</button>
+          </p><p>
+          
+            <button type=button style="width:270px;height:40px" onclick="blePDisconnect('success');">Disconnect device</button>
+          
+          </p>
+      
+      </div>
+      </p><p>
+
+      <div style="width:300px;height:300px;border:1px solid #000;text-align: center">
+
+          <h3>Data from connected device</h3>
+          
+          </p><p>
+          </p><p>
+
+          <table id="dataTable" border="0" bordercolor= "transparent" width="100%">
+
+              <tr>
+                  
+                  <td> Connected to: </td>
+                  <td id="name">Not connected</td>
+              </tr>
+              <tr>
+                  <td> Battery level: </td>
+                  <td id="battery"> - </td>
+              </tr>
+              <tr>
+                  <td> Temperature: </td>
+                  <td id="temperature"> - </td>
+              </tr>
+              
+          </table>
+          <p>
+          </p>
+
+          <canvas id="canvas" style="width:270px;height:160px"></canvas>
+
+          
+      </div>
+      
+      <p>
+      </p>
+      
+            
+      
+  </body>
+</html>
