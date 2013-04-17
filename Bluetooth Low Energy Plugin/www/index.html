@@ -66,7 +66,6 @@
         
             connectedToPeripheral = 0;
         
-            //draw();
         }
         
         
@@ -196,10 +195,8 @@
             if(temperature != "(null)"){
                 var a = document.getElementById('temperature').innerHTML = temperature;
                 
-                //temperatureArray.push('temperature');
                 temperatureArray[temperatureArray.length] = temperature;
 
-                //draw(temperatureArray);
 
             }
         }
@@ -210,64 +207,6 @@
 
         }
                 
-        
-        function draw(temperatureArray){
-            // get the canvas element using the DOM
-            var canvas = document.getElementById('canvas');
-        
-            // lage ny array av de siste verdiene
-            var temp = new Array();
-
-            //temperatureArray = [32, 27, 39, 22, 22, 45, 45, 34, 22, 26, 30];
-            
-            // Make sure we don't execute when canvas isn't supported
-            if (canvas.getContext){
-                
-                // use getContext to use the canvas for drawing
-                var ctx = canvas.getContext('2d');
-                
-                
-                
-                ctx.beginPath();
-                ctx.moveTo(30, 0);
-                ctx.lineTo(30, 120);
-                ctx.lineTo(260, 120);
-                ctx.stroke();
-                
-                                
-                var x = 30;
-                var y = 0;
-
-                
-                ctx.beginPath();
-                ctx.moveTo(30, temperatureArray[0]);
-
-                
-                for(var i = 0; i < temperatureArray.length; i++) {
-                    //ctx.lineTo('start', 100);
-                    ctx.lineTo(x, temperatureArray[i]);
-                    x += 20;
-                }
-                
-                ctx.stroke();
-
-                
-                // Filled triangle
-                /*ctx.beginPath();
-                ctx.moveTo(25,25);
-                ctx.lineTo(105,25);
-                ctx.lineTo(25,105);
-                ctx.fill();
-                
-                // Stroked triangle
-                ctx.beginPath();
-                ctx.moveTo(125,125);
-                ctx.lineTo(125,45);
-                ctx.lineTo(45,125);
-                ctx.closePath();
-                ctx.stroke();*/
-            }
-        }
      
     
     </script>
